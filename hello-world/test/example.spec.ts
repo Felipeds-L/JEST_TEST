@@ -1,66 +1,54 @@
 import test from 'japa'
-import { JSDOM } from 'jsdom'
 import supertest from 'supertest'
-import User from 'App/Models/User'
 const baseUrl = `http://localhost:3333`
+import User from '../app/Models/User'
 
-
-test.group('UserCRUD', () => {
-
-  // test('ensure home page works', async (assert) => {
-  //   /**
-  //    * Make request
-  //    */
-  //   const { text } = await supertest(baseUrl).get('/').expect(200)
-
-  //   /**
-  //    * Construct JSDOM instance using the response HTML
-  //    */
-  //   const { document } = new JSDOM(text).window
-
-  //   const title = document.querySelector('.title')
-  //   assert.exists(title)
-  //   assert.equal(title!.textContent!.trim(), 'It Works!')
-  // })
-
-  test('creating a user', async (assert) => {
+test.group('Auth', () =>{
+  test('testing authentication', async () => {
     const user = new User()
-    user.email = 'milks@isadonisjs.com'
-    user.username = 'memesis'
-    user.password = 'secret'
-    await user.save()
+    user.email = 'felipe@luby.software'
+    user.password = 'senha'
 
-    assert.notEqual(user.password, 'secret2')
-  })
+    const logged = await supertest(baseUrl).post('/api/login').send(user).expect(200)
 
-  // test('delete', async(assert) => {
-  //   const user = await User.findOrFail(11)
-  //   let deleted = false
-  //   try{
-  //     if(user.delete()){
-  //       deleted = true
-  //       console.log(user)
-  //     }else{
-  //       deleted = false
-  //     }
-  //   }catch{
-  //     return
-  //   }
-  //   assert.equal(deleted, true)
-  // })
+    const obj_login = JSON.parse(logged.text)
+    console.log(obj_login['token'])
 
-  test('update', async(assert) => {
-    const user = await User.findOrFail(1)
-    const data = {email: 'newUser@mail.com'}
-    user.merge(data)
-    let updated = false
-    if(await user.save()){
-      updated = true
-    }else{
-      updated = false
-    }
-    assert.equal(updated, true)
 
   })
 
 })
+
+test.group('UserCRUD', () => {
+
+  test('testing user index route', async () => {
+    const b = await supertest(baseUrl).get('/user').expect(200)
+    console.log(b)
+  });
+
+  test('testing user show route', async () => {
+    await supertest(baseUrl).get('/user/11').expect(200)
+  });
+
+  test('testing user delete route', async() => {
+    await supertest(baseUrl).delete('/user/11').expect(200)
+  })
+
+  test('testing user create route', async () => {
+    const user = new User()
+    user.email = 'tddAuthorized@user.login'
+    user.username = 'newLogin',
+    user.password = 'new'
+    await supertest(baseUrl).post('/user').send(user).expect(200)
+  })
+
+    test('testing user update route', async () => {
+      const user = new User()
+      user.email = 'novotdd@teste.com'
+      user.username = 'tddTeste',
+      await supertest(baseUrl).put('/user/8').send(user).expect(200)
+    })
+
+})
+
+
